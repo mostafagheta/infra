@@ -1,0 +1,48 @@
+---
+#################################################################
+# Create hostPath directory for MySQL PV
+#################################################################
+
+- name: Ensure MySQL hostPath data directory exists
+  file:
+    path: /mnt/mysql-data
+    state: directory
+    owner: 1000
+    group: 1000
+    mode: "0755"
+
+#################################################################
+# Obtain join command from master
+#################################################################
+
+- name: Obtain join command from master
+  delegate_to: "{{ groups['master'][0] }}"
+  shell: cat /tmp/kubeadm_join_command.sh
+  register: join_command
+
+#################################################################
+# Join the cluster
+#################################################################
+
+- name: Check node join status
+  stat:
+    path: /etc/kubernetes/kubelet.conf
+  register: joined
+
+- name: Join Kubernetes cluster
+  shell: "{{ join_command.stdout }}"
+  when: not joined.stat.exists
+
+#################################################################
+# Verification
+#################################################################
+
+- name: Verify node status
+  command: systemctl status kubelet
+  register: kubelet_status
+  changed_when: false
+
+- name: Display kubelet status
+  debug:
+    var: kubelet_status.stdout_lines
+

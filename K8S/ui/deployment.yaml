@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: weatherapp-ui
+  namespace: ui
+spec:
+  type: ClusterIP
+  selector:
+    app: ui
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weatherapp-ui
+  namespace: ui
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ui
+  template:
+    metadata:
+      labels:
+        app: ui
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: weatherapp-ui
+          image: mostafagheta/weather-ui:393264fc4b1cac7e182526f582222e8ff87043bf
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          ports:
+            - containerPort: 3000
+          env:
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ui-secret
+                  key: secret-key
+          envFrom:
+            - configMapRef:
+                name: weatherapp-ui-config
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10

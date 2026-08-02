@@ -1,0 +1,8 @@
+---
+- name: Configure worker nodes
+  hosts: worker
+  become: true
+
+  roles:
+    - common
+    - k8s_worker

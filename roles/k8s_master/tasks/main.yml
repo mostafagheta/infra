@@ -1,0 +1,118 @@
+---
+#################################################################
+# Initialize the cluster
+#################################################################
+
+- name: Check whether cluster is initialized
+  stat:
+    path: /etc/kubernetes/admin.conf
+  register: cluster_initialized
+
+- name: Initialize Kubernetes cluster
+  command: >
+    kubeadm init
+    --pod-network-cidr={{ pod_network_cidr }}
+  when: not cluster_initialized.stat.exists
+
+#################################################################
+# Configure kubectl
+#################################################################
+
+- name: Create .kube directory
+  file:
+    path: "/home/{{ kube_user }}/.kube"
+    state: directory
+    owner: "{{ kube_user }}"
+    group: "{{ kube_user }}"
+    mode: "0755"
+
+- name: Copy admin.conf
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: "/home/{{ kube_user }}/.kube/config"
+    owner: "{{ kube_user }}"
+    group: "{{ kube_user }}"
+    mode: "0644"
+    remote_src: true
+
+#################################################################
+# Install Calico
+#################################################################
+
+- name: Install Calico
+  become_user: "{{ kube_user }}"
+  shell: |
+    kubectl apply -f \
+    https://raw.githubusercontent.com/projectcalico/calico/v3.30.3/manifests/calico.yaml
+  environment:
+    KUBECONFIG: "/home/{{ kube_user }}/.kube/config"
+
+#################################################################
+# Generate join token
+#################################################################
+
+- name: Generate join token
+  shell: kubeadm token create --print-join-command
+  register: join_command
+
+- name: Save join command
+  copy:
+    content: "{{ join_command.stdout }}"
+    dest: /tmp/kubeadm_join_command.sh
+    mode: "0755"
+
+#################################################################
+# Install Helm
+#################################################################
+
+- name: Install Helm
+  shell: |
+    wget https://get.helm.sh/helm-v3.18.6-linux-amd64.tar.gz
+    tar -zxvf helm-v3.18.6-linux-amd64.tar.gz
+    mv linux-amd64/helm /usr/local/bin/helm
+  args:
+    creates: /usr/local/bin/helm
+
+#################################################################
+# Install ingress-nginx
+#################################################################
+
+- name: Add ingress repository
+  become_user: "{{ kube_user }}"
+  shell: |
+    helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+    helm repo update
+  environment:
+    KUBECONFIG: "/home/{{ kube_user }}/.kube/config"
+
+- name: Deploy ingress controller
+  become_user: "{{ kube_user }}"
+  shell: |
+    helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
+    --namespace ingress-nginx \
+    --create-namespace \
+    --set controller.service.type=NodePort \
+    --set controller.service.nodePorts.http=30008
+  environment:
+    KUBECONFIG: "/home/{{ kube_user }}/.kube/config"
+
+#################################################################
+# Verification
+#################################################################
+
+- name: Wait for API server
+  wait_for:
+    port: 6443
+    timeout: 300
+
+- name: Display nodes
+  become_user: "{{ kube_user }}"
+  command: kubectl get nodes
+  environment:
+    KUBECONFIG: "/home/{{ kube_user }}/.kube/config"
+  register: node_output
+  changed_when: false
+
+- name: Show nodes
+  debug:
+    var: node_output.stdout_lines

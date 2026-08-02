@@ -1,0 +1,4 @@
+---
+- import_playbook: master_playbook.yml
+- import_playbook: worker_playbook.yml
+- import_playbook: addons_playbook.yml

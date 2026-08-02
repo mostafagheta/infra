@@ -1,0 +1,8 @@
+---
+- name: Configure Kubernetes control plane
+  hosts: master
+  become: true
+
+  roles:
+    - common
+    - k8s_master

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: weatherapp-ui-config
+  namespace: ui
+data:
+  AUTH_HOST: "weatherapp-auth.authentication.svc.cluster.local"
+  AUTH_PORT: "8080"
+  WEATHER_HOST: "weatherapp-weather.weather.svc.cluster.local"
+  WEATHER_PORT: "5000"
