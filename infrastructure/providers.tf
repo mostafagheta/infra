@@ -12,14 +12,13 @@ terraform {
     }
   }
 
-  # Recommended (set up once, outside this config, then uncomment):
-  # backend "s3" {
-  #   bucket         = "<your-tfstate-bucket>"
-  #   key            = "weather-app/terraform.tfstate"
-  #   region         = "<region>"
-  #   encrypt        = true
-  #   dynamodb_table = "<your-lock-table>"
-  # }
+  backend "s3" {
+    bucket       = "weather-app-tfstate-345hagar"
+    key          = "weather-app/terraform.tfstate"
+    region       = "eu-north-1"
+    encrypt      = true
+    use_lockfile = true
+  }
 }
 
 provider "aws" {
