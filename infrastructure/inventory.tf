@@ -5,7 +5,7 @@
 # ansible.cfg  (inventory = inventory.ini).
 # ---------------------------------------------------------------------------
 resource "local_file" "ansible_inventory" {
-  filename        = "${path.root}/../inventory.ini"
+  filename = "${path.root}/../ansible/inventory.ini"
   file_permission = "0644"
 
   content = templatefile("${path.module}/templates/hosts.tpl", {
