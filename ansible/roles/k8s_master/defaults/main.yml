@@ -1,4 +1,4 @@
 ---
-kubernetes_version: "1.32"
+kubernetes_version: "1.35"
 pod_network_cidr: "192.168.0.0/16"
 kube_user: "ec2-user"
