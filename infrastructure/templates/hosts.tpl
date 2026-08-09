@@ -18,4 +18,4 @@ ansible_user=ec2-user
 ansible_ssh_private_key_file=./ansiblekey.pem
 
 [all:vars]
-ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand="ssh -i ./ansiblekey.pem -W %h:%p ec2-user@${bastion_public_ip}"'
+ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ./ansiblekey.pem -W %h:%p ec2-user@${bastion_public_ip}"'
