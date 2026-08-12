@@ -58,13 +58,13 @@ resource "aws_security_group" "master" {
 
   # etcd - cluster-internal only, kept for future control-plane HA even
   # though this design ships a single master
-  ingress {
-    description = "etcd client API"
-    from_port   = 2379
-    to_port     = 2380
-    protocol    = "tcp"
-    cidr_blocks = [var.vpc_cidr]
-  }
+#  ingress {
+#    description = "etcd client API"
+#    from_port   = 2379
+#    to_port     = 2380
+#    protocol    = "tcp"
+#    cidr_blocks = [var.vpc_cidr]
+#  }
 
   # kubelet API on the master itself (kubeadm runs a kubelet on control-plane nodes too)
   ingress {
@@ -110,14 +110,13 @@ resource "aws_security_group" "master" {
   }
 
   # Flannel VXLAN (kept for compatibility if CNI is switched)
-  ingress {
-    description = "Flannel VXLAN overlay"
-    from_port   = 8472
-    to_port     = 8472
-    protocol    = "udp"
-    cidr_blocks = [var.vpc_cidr]
-  }
-
+#  ingress {
+#    description = "Flannel VXLAN overlay"
+#    from_port   = 8472
+#    to_port     = 8472
+#    protocol    = "udp"
+#    cidr_blocks = [var.vpc_cidr]
+#  }
   # Allow all internal cluster traffic (essential for Calico IPIP protocol 4, Webhooks, CNI, etc.)
   ingress {
     description = "All intra-cluster traffic"
@@ -185,13 +184,13 @@ resource "aws_security_group" "worker" {
   }
 
   # Flannel VXLAN (kept for compatibility if CNI is switched)
-  ingress {
-    description = "Flannel VXLAN overlay"
-    from_port   = 8472
-    to_port     = 8472
-    protocol    = "udp"
-    cidr_blocks = [var.vpc_cidr]
-  }
+#  ingress {
+#    description = "Flannel VXLAN overlay"
+#    from_port   = 8472
+#    to_port     = 8472
+#    protocol    = "udp"
+#    cidr_blocks = [var.vpc_cidr]
+#  }
 
   # NodePort services - only reachable from the ALB, never directly from the internet
   ingress {
