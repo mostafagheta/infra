@@ -1,15 +1,4 @@
 ---
-#################################################################
-# Create hostPath directory for MySQL PV
-#################################################################
-
-- name: Ensure MySQL hostPath data directory exists
-  file:
-    path: /mnt/mysql-data
-    state: directory
-    owner: 1000
-    group: 1000
-    mode: "0755"
 
 #################################################################
 # Obtain join command from master
