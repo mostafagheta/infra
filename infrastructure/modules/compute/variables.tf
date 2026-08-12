@@ -25,12 +25,12 @@ variable "bastion_sg_id" {
 
 variable "instance_type_master" {
   type    = string
-  default = "t3.medium"
+  default = "m7i-flex.large"
 }
 
 variable "instance_type_worker" {
   type    = string
-  default = "t3.medium"
+  default = "m7i-flex.large"
 }
 
 variable "worker_count" {
@@ -46,11 +46,11 @@ variable "key_name" {
 variable "master_private_ip" {
   type        = string
   description = "Fixed private IP for the master node. Must be within the first public subnet CIDR."
-  default     = "10.0.1.10"
+  default     = "10.0.11.10"
 }
 
 variable "worker_private_ips" {
   type        = list(string)
   description = "Fixed private IPs for each worker node. worker[n] must be within subnet_ids[n % len(subnets)]."
-  default     = ["10.0.1.20", "10.0.2.20"]
+  default     = ["10.0.11.20", "10.0.12.20"]
 }
